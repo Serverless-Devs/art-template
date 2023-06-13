@@ -104,15 +104,16 @@ class Compiler {
         if (minimize) {
             try {
                 source = htmlMinifier(source, options);
-            } catch (error) {}
+            } catch (error) { }
         }
 
         this.source = source;
-        this.getTplTokens(source, options.rules, this).forEach(tokens => {
-            if (tokens.type === tplTokenizer.TYPE_STRING) {
-                this.parseString(tokens);
+        const tokens = this.getTplTokens(source, options.rules, this);
+        tokens.forEach(token => {
+            if (token.type === tplTokenizer.TYPE_STRING) {
+                this.parseString(token);
             } else {
-                this.parseExpression(tokens);
+                this.parseExpression(token, tokens.length);
             }
         });
     }
@@ -218,7 +219,7 @@ class Compiler {
      * 解析逻辑表达式语句
      * @param {Object} tplToken
      */
-    parseExpression(tplToken) {
+    parseExpression(tplToken, tokensLength) {
         const source = tplToken.value;
         const script = tplToken.script;
         const output = script.output;
@@ -227,9 +228,9 @@ class Compiler {
 
         if (output) {
             if (escape === false || output === tplTokenizer.TYPE_RAW) {
-                code = `${OUT}+=${script.code}`;
+                code = tokensLength > 1 ? `${OUT}+=${script.code}` : `${OUT}=${script.code}`;
             } else {
-                code = `${OUT}+=${ESCAPE}(${script.code})`;
+                code = tokensLength > 1 ? `${OUT}+=${ESCAPE}(${script.code})` : `${OUT}=${ESCAPE}(${script.code})`;
             }
         }
 
@@ -347,16 +348,16 @@ class Compiler {
 
             stacks.push(
                 'throw {' +
-                    [
-                        `name:'RuntimeError'`,
-                        `path:${stringify(filename)}`,
-                        `message:error.message`,
-                        `line:${LINE}[0]+1`,
-                        `column:${LINE}[1]+1`,
-                        `source:${stringify(source)}`,
-                        `stack:error.stack`
-                    ].join(`,`) +
-                    '}'
+                [
+                    `name:'RuntimeError'`,
+                    `path:${stringify(filename)}`,
+                    `message:error.message`,
+                    `line:${LINE}[0]+1`,
+                    `column:${LINE}[1]+1`,
+                    `source:${stringify(source)}`,
+                    `stack:error.stack`
+                ].join(`,`) +
+                '}'
             );
 
             stacks.push(`}`);

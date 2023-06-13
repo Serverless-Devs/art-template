@@ -1,5 +1,5 @@
 {
-  "name": "art-template",
+  "name": "@serverless-devs/art-template",
   "typings": "index.d.ts",
   "description": "JavaScript Template Engine",
   "homepage": "http://aui.github.com/art-template/",
@@ -16,6 +16,8 @@
     "build": "npm run build-lib && npm run build-web",
     "build-lib": "rm -rf lib && babel src --out-dir lib",
     "build-web": "export NODE_ENV=production && webpack",
+    "prepublishOnly": "npm run build",
+    "pub": "npm publish",
     "dev": "babel src --watch --out-dir lib",
     "test": "export NODE_ENV=production && istanbul cover node_modules/mocha/bin/_mocha -- --ui exports --colors 'test/**/*.js'",
     "coverage": "cat ./coverage/lcov.info | coveralls"
@@ -25,6 +27,10 @@
     "lib/",
     "index.d.ts"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
   "engines": {
     "node": ">= 1.0.0"
   },
